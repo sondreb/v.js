@@ -7,6 +7,8 @@ v.js only supports the most modern browsers, relies on the latest JavaScript spe
 
 v.js will only have a basic set of functionality, and you can decide to extend upon that if you want to. If you need more features, look elsewhere.
 
+v.js is optimized for web apps where you can control the software used by users. It is not recommended to use v.js. on a web app that are public, as it will only function properly in the most modern browsers.
+
 v.js is currently in prototype stage and not ready for use. Use at your own risk.
 
 ## Reference v.js
@@ -32,6 +34,7 @@ var app = new V({
     app: new MyApp() 
 });
 ```
+It can be used in two manners: global functions or scoped functions attached to the V instance through the app instance.
 
 ## v.js configuration options
 * root: The starting HTML element. You can use multiple V instances that are connected to different HTML elements. If you don't supply the root ID, the body element will be used. This property is the ID of the DOM element, the only selector supported for root element.
@@ -157,7 +160,17 @@ You also need to add this class to all pages, except the starting page.
 
 **OnEnd** - called when navigation away from the web app occurs or browser has been closed. You should not rely on this always being called, especially not if the browser crashes.
 
-## Development and examples
+# Principles
+
+v.js is built on certain principles which is partly responsible for its existence.
+
+v.js is built to reduce dependency on third party libraries. This is partly to improve the security, by reducing dependencies and total amount of code.
+
+v.js should be small enough for any developer to read and review in a short amount of time.
+
+v.js should use the native capabilities of modern browsers and not take any care for backwards compatibility.
+
+# Development and examples
 
 If you want to contribute with development on v.js, clone the repo and install the watch-http-server globally:
 

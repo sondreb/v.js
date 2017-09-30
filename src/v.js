@@ -6,8 +6,7 @@
  * 
  * v.js only supports the most modern browsers, relies on the latest JavaScript specifications.
  * 
- * It can be used in two manners: global functions or scoped functions attatched to the V instance.
- * 
+ * URL: https://github.com/sondreb/v.js
  */
 export class V {
     constructor(configuration) {
