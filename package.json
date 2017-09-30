@@ -1,0 +1,23 @@
+{
+  "name": "v.js",
+  "version": "0.0.0",
+  "description": "v.js is a tiny and modern library for interactive web apps.",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "start": "watch-http-server ./",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sondreb/v.js.git"
+  },
+  "author": "",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/sondreb/v.js/issues"
+  },
+  "homepage": "https://github.com/sondreb/v.js#readme"
+}
