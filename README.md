@@ -186,6 +186,12 @@ npm start
 
 Then you can navigate to [http://localhost:8080/examples/01/](http://localhost:8080/examples/01/) to see the first example.
 
+# Specifications used
+
+As v.js is under active development, what type of HTML and JavaScript specification it relies on can change. Here is a non-exhaustive list of technologies that v.js relies on:
+
+* [async](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function)/[await](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await) - creates much cleaner code for promise-based code.
+* [import](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) - defered and scoped module loading.
 
 # License
 

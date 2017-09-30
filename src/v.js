@@ -79,18 +79,35 @@ export class V {
     }
 
     el(id) {
-        return document.getElementById(id);
-    }
-
-    hide(element) {
-        if (element) {
-            element.style.display = 'none';
+        if (typeof id === 'string') {
+            return document.getElementById(id);
+        } else {
+            return id;
         }
     }
 
-    show(element) {
-        if (element) {
-            element.style.display = 'inline-block';
+    style(element, key, value)
+    {
+        element.style[key] = value;
+    }
+
+    hide(element) {
+        var domElement = this.el(element);
+
+        if (domElement) {
+            this.style(domElement, 'display', 'none');
+        }
+    }
+
+    show(element, type) {
+        var domElement = this.el(element);
+
+        if (!type) {
+            type = 'inline-block';
+        }
+
+        if (domElement) {
+            this.style(domElement, 'display', type);
         }
     }
 
@@ -122,8 +139,7 @@ export class V {
             }
         });
 
-        if (!self.activePage)
-        {
+        if (!self.activePage) {
             self.error('Unable to find a corresponding page for the action. Page name: ' + id);
             return;
         }
@@ -225,7 +241,7 @@ export class V {
         } else {
             this.log('Calling: ' + methodName);
             //this.error('Calling: ' + methodName);
-            func(action, data);
+            func(this, action, data);
         }
     }
 
@@ -341,7 +357,7 @@ export class V {
 
     init() {
         var self = this;
-        
+
         this.call('onStart');
 
         // Hide all the pages initially.
@@ -368,47 +384,45 @@ export class V {
 
         this.initPage(startPage);
 
-        return;
+        // // Hook up page navigations
+        // var pageLinks = this.root.querySelectorAll('[' + this.namespace + 'page]');
 
-        // Hook up page navigations
-        var pageLinks = this.root.querySelectorAll('[' + this.namespace + 'page]');
+        // pageLinks.forEach((action) => {
+        //     action.addEventListener('click', () => {
+        //         this.page(action.getAttribute(this.namespace + 'page'));
+        //     });
+        // });
 
-        pageLinks.forEach((action) => {
-            action.addEventListener('click', () => {
-                this.page(action.getAttribute(this.namespace + 'page'));
-            });
-        });
+        // // Hook up actions
+        // var actionLinks = document.querySelectorAll('[' + this.namespace + 'action]');
 
-        // Hook up actions
-        var actionLinks = document.querySelectorAll('[' + this.namespace + 'action]');
+        // actionLinks.forEach((action) => {
+        //     action.addEventListener('click', (source) => {
+        //         // Find all input element contained within the parent element that has a class named "input-form".
+        //         var inputForm = findParentWithClass(action, 'input-form');
 
-        actionLinks.forEach((action) => {
-            action.addEventListener('click', (source) => {
-                // Find all input element contained within the parent element that has a class named "input-form".
-                var inputForm = findParentWithClass(action, 'input-form');
+        //         if (inputForm) {
+        //             var inputElements = inputForm.getElementsByTagName('input');
 
-                if (inputForm) {
-                    var inputElements = inputForm.getElementsByTagName('input');
+        //             var data = {
+        //             };
 
-                    var data = {
-                    };
+        //             for (var i = 0; i < inputElements.length; i++) {
+        //                 var input = inputElements[i];
 
-                    for (var i = 0; i < inputElements.length; i++) {
-                        var input = inputElements[i];
+        //                 var id = input.name.replace('-', '.');
+        //                 var value = input.value;
 
-                        var id = input.name.replace('-', '.');
-                        var value = input.value;
+        //                 setData(data, id, value);
 
-                        setData(data, id, value);
+        //                 // Replace the form input fields.
+        //                 input.value = null;
+        //             }
+        //         }
 
-                        // Replace the form input fields.
-                        input.value = null;
-                    }
-                }
-
-                window[action.getAttribute(this.namespace + 'action')](action, data);
-            });
-        });
+        //         window[action.getAttribute(this.namespace + 'action')](action, data);
+        //     });
+        // });
 
         window.onbeforeunload = function (event) {
             self.call('onEnd');

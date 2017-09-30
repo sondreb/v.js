@@ -1,13 +1,21 @@
-function onExpandHeader() {
-    var headerTitle = document.getElementById('header-title');
-    headerTitle.style.display = 'block';
+
+//** first parameter is the v instance, the second parameter is the source DOM element. third parameter is additional data. */
+function onExpandHeader(v, s, d) {
+    v.show('header-title', 'block');
+    v.hide(s)
+    v.show('collapse-button');
 }
 
-function onCollapseHeader() {
-    var headerTitle = document.getElementById('header-title');
-    headerTitle.style.display = 'none';
+function onCollapseHeader(v, s) {
+    v.hide('header-title');
+    v.hide(s)
+    v.show('expand-button');
 }
 
-function onStart() {
-    console.log('onStart from header module!');
+function onStart(v) {
+    v.hide('expand-button');
+}
+
+function onStarted(v) {
+    //v.hide('expand-button');
 }
