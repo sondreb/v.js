@@ -9,6 +9,10 @@ export class MyApp {
         console.log('onDetailsOpened!!!');
     }
 
+    async onWelcomeOpened() {
+        console.log('onDetailsOpened!!!');
+    }
+
     async onStarted(v) {
         console.log('onStarted from app module!');
 

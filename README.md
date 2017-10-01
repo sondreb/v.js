@@ -1,15 +1,15 @@
 # v.js
 v.js is a tiny and modern library for interactive web apps.
 
-## Limitations
+## Features
 
-v.js only supports the most modern browsers, relies on the latest JavaScript specifications. Don't expect it to work in anything other than the very latest version of all browsers. Internet Explorer will never be supported.
-
-v.js will only have a basic set of functionality, and you can decide to extend upon that if you want to. If you need more features, look elsewhere.
-
-v.js is optimized for web apps where you can control the software used by users. It is not recommended to use v.js. on a web app that are public, as it will only function properly in the most modern browsers.
+v.js will only have a basic set of functionality, and you can decide to extend upon that if you want to. If you need more features, either extend or try something else.
 
 v.js is currently in prototype stage and not ready for use. Use at your own risk.
+
+v.js is built up around handlers (functions) for actions that happens in your web app. To make things simpler for you, you can either build a class that holds your handlers, or you can simply rely on global functions.
+
+v.js supports actions, page views with external view loading, and form input and binding.
 
 ## Reference v.js
 
@@ -186,11 +186,10 @@ npm start
 
 Then you can navigate to [http://localhost:8080/examples/01/](http://localhost:8080/examples/01/) to see the first example.
 
-# Specifications used
+# To import, or not to import
 
-As v.js is under active development, what type of HTML and JavaScript specification it relies on can change. Here is a non-exhaustive list of technologies that v.js relies on:
+v.js can be used with the latest import functionality in latest JavaScript versions, but you don't have to. Have a look at the samples which shows how to do both.
 
-* [async](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function)/[await](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await) - creates much cleaner code for promise-based code.
 * [import](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) - defered and scoped module loading.
 
 # License

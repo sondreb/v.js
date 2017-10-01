@@ -22,8 +22,12 @@
 
         [data-v-page] {
             display: none;
+            box-sizing: border-box;
             border: 4px solid gray;
             margin-top: 10px;
+            width: 100%;
+            min-height: 400px;
+            padding: 30px;
         }
 
         #loading {
@@ -54,19 +58,23 @@
 
         <div id="page-home" data-v-page="home|page-home.html">Loading...</div>
 
-        <div data-v-page="welcome" data-v-opened="onDetailsOpened">
+        <div data-v-page="welcome" data-v-opened="onWelcomeOpened">
             <h1>Welcome page!</h1>
             <p>This is the introduction.</p>
             <p>
                 <button data-v-open="home">Home</button>
+                <button data-v-open="welcome">Welcome</button>
                 <button data-v-open="details">Details</button>
             </p>
         </div>
+
         <div data-v-page="details" data-v-opened="onDetailsOpened">
             <h1>Details page!</h1>
             <p>This is the details.</p>
             <p>
+                <button data-v-open="home">Home</button>
                 <button data-v-open="welcome">Welcome</button>
+                <button data-v-open="details">Details</button>
             </p>
         </div>
     </div>

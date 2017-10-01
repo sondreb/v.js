@@ -2,10 +2,6 @@
 /** v.js is a tiny and quick library for interactive web apps.
  *  v0.0.1
  * 
- * If you want a full featured library, look elsewhere.
- * 
- * v.js only supports the most modern browsers, relies on the latest JavaScript specifications.
- * 
  * URL: https://github.com/sondreb/v.js
  */
 export class V {
@@ -78,6 +74,7 @@ export class V {
         }
     }
 
+    /** Selects a DOM element based upon the ID if input is a string. Else the same object is returned. */
     el(id) {
         if (typeof id === 'string') {
             return document.getElementById(id);
@@ -85,12 +82,19 @@ export class V {
             return id;
         }
     }
+    
+    /** Returns all elements using a query selector. */
+    elements(type) {
+        return this.root.querySelectorAll('[' + this.selector + type + ']');
+    }
 
+    /** Sets a style on a DOM element. */
     style(element, key, value)
     {
         element.style[key] = value;
     }
 
+    /** Hides a DOM element. */
     hide(element) {
         var domElement = this.el(element);
 
@@ -99,6 +103,7 @@ export class V {
         }
     }
 
+    /** Shows a DOM element. The "type" parameter can be used to display as block, as oppose to the default "inline-block". */
     show(element, type) {
         var domElement = this.el(element);
 
@@ -111,7 +116,8 @@ export class V {
         }
     }
 
-    async page(id) {
+    /** Navigates to a page. */
+    page(id) {
         var self = this;
 
         // Hide the previous active page.
@@ -195,6 +201,7 @@ export class V {
         }
     }
 
+    /** Get's a field on an object. */
     getData(data, prop) {
         if (typeof data === 'undefined') {
             return;
@@ -209,6 +216,7 @@ export class V {
         return data[prop];
     }
 
+    /** Sets a field on an object. */
     setData(data, prop, value) {
         if (typeof data === 'undefined') {
             return;
@@ -228,6 +236,7 @@ export class V {
         data[prop] = value;
     }
 
+    /** Calls a method. */
     call(methodName, action, data) {
         if (methodName.toLowerCase() === 'eval') { // A minor basic attempt to improve security.
             this.log('What are you trying to do?');
@@ -245,6 +254,7 @@ export class V {
         }
     }
 
+    /** Downloads files using XMLHttpRequest. */
     download(url, callback) {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
@@ -256,6 +266,7 @@ export class V {
         xhttp.send();
     }
 
+    /** Initializes a page. */
     initPage(page) {
         var self = this;
 
@@ -338,11 +349,8 @@ export class V {
         }
     }
 
-    elements(type) {
-        return this.root.querySelectorAll('[' + this.selector + type + ']');
-    }
-
-    _hidePages() {
+    /** Hides all pages. */
+    hidePages() {
         var self = this;
 
         // Hide all defined pages by default.
@@ -355,13 +363,14 @@ export class V {
         return pages;
     }
 
+    /** Initialize method for v.js. */
     init() {
         var self = this;
 
         this.call('onStart');
 
         // Hide all the pages initially.
-        var pages = this._hidePages();
+        var pages = this.hidePages();
 
         // Find the start page or select the first available page.
         var startPage = null;
