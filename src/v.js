@@ -168,7 +168,7 @@ export class V {
         if (openedEvent) {
             var result = self.call(openedEvent, parameters, self.activePage);
 
-            if (result.constructor.name === 'Promise') {
+            if (result && result.constructor.name === 'Promise') {
                 result.then((data) => {
                     self.bind(self.activePage, data);
                 });
@@ -307,8 +307,21 @@ export class V {
         this.call(event.srcElement.getAttribute(this.selector + 'action'), event, event.srcElement, data);
     }
 
+    /** Attempts to find an attribute on parents if not exists on child. */
+    findAttribute(element, attributeName) {
+        var attribute = element.getAttribute(this.selector + 'open');
+
+        if (attribute) {
+            return attribute;
+        }
+        else {
+            return this.findAttribute(element.parentElement);
+        }
+    }
+
     onPage(event) {
-        this.page(event.srcElement.getAttribute(this.selector + 'open'));
+        var attribute = this.findAttribute(event.srcElement);
+        this.page(attribute);
     }
 
     /** Initializes a page. */
@@ -474,46 +487,6 @@ export class V {
         }
 
         this.initPage(startPage);
-
-        // // Hook up page navigations
-        // var pageLinks = this.root.querySelectorAll('[' + this.namespace + 'page]');
-
-        // pageLinks.forEach((action) => {
-        //     action.addEventListener('click', () => {
-        //         this.page(action.getAttribute(this.namespace + 'page'));
-        //     });
-        // });
-
-        // // Hook up actions
-        // var actionLinks = document.querySelectorAll('[' + this.namespace + 'action]');
-
-        // actionLinks.forEach((action) => {
-        //     action.addEventListener('click', (source) => {
-        //         // Find all input element contained within the parent element that has a class named "input-form".
-        //         var inputForm = findParentWithClass(action, 'input-form');
-
-        //         if (inputForm) {
-        //             var inputElements = inputForm.getElementsByTagName('input');
-
-        //             var data = {
-        //             };
-
-        //             for (var i = 0; i < inputElements.length; i++) {
-        //                 var input = inputElements[i];
-
-        //                 var id = input.name.replace('-', '.');
-        //                 var value = input.value;
-
-        //                 setData(data, id, value);
-
-        //                 // Replace the form input fields.
-        //                 input.value = null;
-        //             }
-        //         }
-
-        //         window[action.getAttribute(this.namespace + 'action')](action, data);
-        //     });
-        // });
 
         window.onbeforeunload = function (event) {
             self.call('onEnd');

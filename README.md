@@ -186,7 +186,7 @@ Then run to host a webserver:
 npm start
 ```
 
-Then you can navigate to [http://localhost:8080/examples/01/](http://localhost:8080/examples/01/) to see the first example.
+Then you can navigate to [http://localhost:8088/examples/01/](http://localhost:8088/examples/01/) to see the first example.
 
 # To import, or not to import
 
