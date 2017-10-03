@@ -74,6 +74,23 @@ export class V {
         }
     }
 
+    /** Used to get or set the attribute. The value must be the default undefined to read, otherwise it is set. If set to null, the attribute is removed. */
+    att(type, element, value = undefined) {
+        if (!element) {
+            debugger;
+        }
+
+        if (value === undefined) {
+            return element.getAttribute(this.selector + type);
+        } else {
+            if (value !== null) {
+                element.setAttribute(this.select + type, value);
+            } else {
+                element.removeAttribute(this.select + type);
+            }
+        }
+    }
+
     /** Selects a DOM element based upon the ID if input is a string. Else the same object is returned. */
     el(id) {
         if (typeof id === 'string') {
@@ -84,8 +101,8 @@ export class V {
     }
 
     /** Returns all elements using a query selector. */
-    elements(type) {
-        return this.root.querySelectorAll('[' + this.selector + type + ']');
+    elements(type, element = this.root) {
+        return element.querySelectorAll('[' + this.selector + type + ']');
     }
 
     /** Sets a style on a DOM element. */
@@ -128,7 +145,7 @@ export class V {
         var page = null;
 
         pages.forEach((page) => {
-            var pageAtt = page.getAttribute(self.selector + 'page');
+            var pageAtt = self.att('page', page);
 
             if (pageAtt) {
                 var values = pageAtt.split('|');
@@ -150,7 +167,29 @@ export class V {
         }
 
         self.show(self.activePage);
-        self.initPage(self.activePage);
+        self.initPage(self.activePage, () => {
+
+            var parameters = {};
+
+            var openedEvent = self.att('opened', self.activePage);
+
+            if (openedEvent) {
+                var result = self.call(openedEvent, parameters, self.activePage);
+
+                if (result && result.constructor.name === 'Promise') {
+                    result.then((data) => {
+                        self.bind(self.activePage, data);
+                    });
+                }
+                else {
+                    self.bind(self.activePage, result);
+                }
+
+                // Call the opened page and grab the return data structure used for binding.
+                //var data = await this.root[openedEvent](parameters, page);
+            }
+
+        });
 
         // var pages = document.getElementsByClassName('page-open');
 
@@ -160,26 +199,6 @@ export class V {
 
         // var page = document.getElementById('page-' + id);
         // page.classList.add('page-open');
-
-        var parameters = {};
-
-        var openedEvent = self.activePage.getAttribute(this.selector + 'opened');
-
-        if (openedEvent) {
-            var result = self.call(openedEvent, parameters, self.activePage);
-
-            if (result && result.constructor.name === 'Promise') {
-                result.then((data) => {
-                    self.bind(self.activePage, data);
-                });
-            }
-            else {
-                self.bind(self.activePage, result);
-            }
-
-            // Call the opened page and grab the return data structure used for binding.
-            //var data = await this.root[openedEvent](parameters, page);
-        }
     }
 
     sanitizeDataSelector(text) {
@@ -187,14 +206,16 @@ export class V {
     }
 
     bind(element, data) {
-        var bindingElements = element.querySelectorAll('[' + this.selector + 'bind]');
+        var self = this;
+
+        var bindingElements = self.elements('bind', element);
 
         for (var i = 0; i < bindingElements.length; i++) {
             var inputElement = bindingElements[i];
-            var bindAttribute = inputElement.getAttribute(this.selector + 'bind');
+            var bindAttribute = self.att('bind', inputElement);
 
             if (bindAttribute !== null) {
-                var dataValue = this.getData(data, this.sanitizeDataSelector(bindAttribute));
+                var dataValue = self.getData(data, self.sanitizeDataSelector(bindAttribute));
 
                 if (dataValue === undefined) {
                     // We'll force the dataValue to be null, so we won't see "undefined" text in input fields.
@@ -237,6 +258,71 @@ export class V {
                 }
             }
         }
+
+        // Hook up repeater lists.
+        var repeaters = self.elements('list', element);
+
+        repeaters.forEach((repeater) => {
+
+            // Reset the repeater on every bind.
+
+            var listatt = self.att('list', repeater).split('|');
+
+            if (listatt.length != 2) {
+                throw new Error('The list binding must include item name and array name, separated by an pipe ("|")');
+            }
+
+            var listdata = data[listatt[1]];
+            var listitems = self.elements('item', repeater);
+
+            var itemtemplates = [];
+
+            listitems.forEach((listitem) => {
+                var listatt = self.att('item', listitem);
+                itemtemplates.push({ key: listatt, element: listitem });
+            });
+
+            // item actions are registered with a different action attribute than normal actions, the item-action.
+            var itemActions = self.elements('item-action', repeater);
+
+            // Repeat all items in the available data array.
+            listdata.forEach((item) => {
+                // Repeat all the items in the item.
+                for (var k in item) {
+                    if (item.hasOwnProperty(k)) {
+
+                        var key = k;
+                        var value = item[k];
+
+                        // Find all elements that binds to the key.
+                        var filteredItems = itemtemplates.filter((itemtemplate) => itemtemplate.key === key);
+
+                        filteredItems.forEach((filteredItem) => {
+                            filteredItem.element.innerHTML = value;
+                        });
+                    }
+                }
+
+                itemActions.forEach((itemAction) => {
+                    itemAction.addEventListener('click', (event) => {
+                        self.call(self.att('item-action', itemAction), event, event.srceElement, item);
+                    });
+                });
+            });
+
+            // Make sure we don't initialize again.
+            // if (repeater.getAttribute(this.selector + 'init') === 'true') {
+            //     return;
+            // }
+
+            // action.addEventListener('click', (e) => {
+            //     self.onPage(e);
+            // });
+
+            // repeater.setAttribute(this.selector + 'init', 'true');
+        });
+
+
     }
 
     /** Get's a field on an object. */
@@ -304,12 +390,16 @@ export class V {
     }
 
     onAction(event, data) {
-        this.call(event.srcElement.getAttribute(this.selector + 'action'), event, event.srcElement, data);
+        this.call(this.att('action', event.srcElement), event, event.srcElement, data);
     }
 
     /** Attempts to find an attribute on parents if not exists on child. */
     findAttribute(element, attributeName) {
-        var attribute = element.getAttribute(this.selector + 'open');
+        if (!element) {
+            return null;
+        }
+
+        var attribute = this.att('open', element);
 
         if (attribute) {
             return attribute;
@@ -325,7 +415,7 @@ export class V {
     }
 
     /** Initializes a page. */
-    initPage(page) {
+    initPage(page, cb) {
         var self = this;
 
         if (!page) {
@@ -335,7 +425,7 @@ export class V {
         self.show(page);
 
         var viewUrl = null;
-        var pageAtt = page.getAttribute(this.selector + 'page');
+        var pageAtt = self.att('page', page);
 
         if (pageAtt) {
             var pageSetup = pageAtt.split('|');
@@ -353,22 +443,22 @@ export class V {
         if (viewUrl) {
             this.download(viewUrl, (html) => {
                 // After loading, remove the attribute and we'll re-call this same method to init the page.
-                var existingAttributeValue = page.getAttribute(this.selector + 'page');
+                var existingAttributeValue = this.att('page', page);
 
                 page.setAttribute(this.selector + 'page', existingAttributeValue.replace(viewUrl, ''));
                 page.innerHTML = html;
 
                 // Init again, which will hook up handlers and binding.
-                self.initPage(page);
+                self.initPage(page, cb);
             });
         }
         else {
-            var actionLinks = self.root.querySelectorAll('[' + this.selector + 'action]');
+            var actionLinks = self.elements('action');
 
             actionLinks.forEach((action) => {
 
                 // Make sure we don't initialize again.
-                if (action.getAttribute(this.selector + 'init') === 'true') {
+                if (self.att('init', action) === 'true') {
                     return;
                 }
 
@@ -421,16 +511,16 @@ export class V {
                     self.onAction(e, data);
                 });
 
-                action.setAttribute(this.selector + 'init', 'true');
+                self.att('init', action, 'true');
             });
 
             // Hook up page navigations
-            var pageLinks = this.root.querySelectorAll('[' + this.selector + 'open]');
+            var pageLinks = this.elements('open');
 
             pageLinks.forEach((action) => {
 
                 // Make sure we don't initialize again.
-                if (action.getAttribute(this.selector + 'init') === 'true') {
+                if (self.att('init', action) === 'true') {
                     return;
                 }
 
@@ -438,9 +528,10 @@ export class V {
                     self.onPage(e);
                 });
 
-                action.setAttribute(this.selector + 'init', 'true');
+                self.att('init', action, 'true');
             });
 
+            cb();
         }
     }
 
@@ -486,7 +577,9 @@ export class V {
             }
         }
 
-        this.initPage(startPage);
+        this.initPage(startPage, () => {
+            this.call('onStarted');
+        });
 
         window.onbeforeunload = function (event) {
             self.call('onEnd');
@@ -500,7 +593,5 @@ export class V {
             // }
             // return message;
         };
-
-        this.call('onStarted');
     }
 }
