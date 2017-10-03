@@ -6,10 +6,11 @@
     <title>v.js - example 01</title>
 
     <style>
-        html, body {
+        html,
+        body {
             padding: 0;
             margin: 0;
-            font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif
         }
 
         #my-app {
@@ -61,6 +62,15 @@
         <div data-v-page="welcome" data-v-opened="onWelcomeOpened">
             <h1>Welcome page!</h1>
             <p>This is the introduction.</p>
+
+            <form>
+                <select name="options-list" data-v-bind="options-list"></select>
+                <button type="button" data-v-action="onSaveList">Submit</button>
+            </form>
+
+            <p id="list-value">
+            </p>
+
             <p>
                 <button data-v-open="home">Home</button>
                 <button data-v-open="welcome">Welcome</button>
@@ -71,6 +81,15 @@
         <div data-v-page="details" data-v-opened="onDetailsOpened">
             <h1>Details page!</h1>
             <p>This is the details.</p>
+            <form>
+                Nickname:
+                <input type="text" name="profile-nickname" data-v-bind="profile.nickname">
+                <button type="button" data-v-action="onSave">Save</button>
+            </form>
+
+            <p id="details-nickname">
+            </p>
+
             <p>
                 <button data-v-open="home">Home</button>
                 <button data-v-open="welcome">Welcome</button>

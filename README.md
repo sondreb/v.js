@@ -9,7 +9,7 @@ v.js is currently in prototype stage and not ready for use. Use at your own risk
 
 v.js is built up around handlers (functions) for actions that happens in your web app. To make things simpler for you, you can either build a class that holds your handlers, or you can simply rely on global functions.
 
-v.js supports actions, page views with external view loading, and form input and binding.
+v.js supports actions, page views with external view loading, and form input and binding. Actions can use the new async/await keywords.
 
 ## Reference v.js
 
@@ -93,7 +93,7 @@ The parameters are supplied custom parameters to the navigation, and the page is
 
 ## Forms and input
 
-v.js supports basic forms and input. Simply create input fields either with a form element or any HTML element with the class "v-form". Everything with the form, or the element with class "v-form", will be submitted to the action handler. Having the option of using any HTML element with the class v-form, allows you to have a virtual form within a normal form. HTML specification does not allow a form within a form.
+v.js supports basic forms and input. Simply create input fields either with a form element and a button of type=button (don't use submit, this will submit the form and reload the web app). Everything with the form will be sent to the action handler.
 
 ```html
 <div class="v-form">
@@ -120,6 +120,8 @@ On the page handlers, you can load and set the data object which is then used by
     <button data-ume-action="onProfileSave">Save</button>
 </form>
 ```
+
+Bind attributes can be written using either "." or "-" as object separator.
 
 Within the data-v-opened page handler for this page, you must return an object containing a profile structure with a nickname value.
 

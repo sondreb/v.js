@@ -1,14 +1,14 @@
 
 //** first parameter is the v instance, the second parameter is the source DOM element. third parameter is additional data. */
-function onExpandHeader(v, s, d) {
+function onExpandHeader(v, event, source, data) {
     v.show('header-title', 'block');
-    v.hide(s)
+    v.hide(source)
     v.show('collapse-button');
 }
 
-function onCollapseHeader(v, s) {
+function onCollapseHeader(v, event, source, data) {
     v.hide('header-title');
-    v.hide(s)
+    v.hide(source)
     v.show('expand-button');
 }
 

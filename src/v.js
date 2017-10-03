@@ -82,15 +82,14 @@ export class V {
             return id;
         }
     }
-    
+
     /** Returns all elements using a query selector. */
     elements(type) {
         return this.root.querySelectorAll('[' + this.selector + type + ']');
     }
 
     /** Sets a style on a DOM element. */
-    style(element, key, value)
-    {
+    style(element, key, value) {
         element.style[key] = value;
     }
 
@@ -167,37 +166,76 @@ export class V {
         var openedEvent = self.activePage.getAttribute(this.selector + 'opened');
 
         if (openedEvent) {
-            //var data = self.call(openedEvent, parameters, page);
-            //self.bind(page, data);
+            var result = self.call(openedEvent, parameters, self.activePage);
+
+            if (result.constructor.name === 'Promise') {
+                result.then((data) => {
+                    self.bind(self.activePage, data);
+                });
+            }
+            else {
+                self.bind(self.activePage, result);
+            }
 
             // Call the opened page and grab the return data structure used for binding.
             //var data = await this.root[openedEvent](parameters, page);
         }
     }
 
-    bind(element, data) {
-        var children = element.children;
-        for (var i = 0; i < children.length; i++) {
-            var child = children[i];
+    sanitizeDataSelector(text) {
+        return text.split('-').join('.');
+    }
 
-            var bindAttribute = child.getAttribute(this.selector + 'bind');
+    bind(element, data) {
+        var bindingElements = element.querySelectorAll('[' + this.selector + 'bind]');
+
+        for (var i = 0; i < bindingElements.length; i++) {
+            var inputElement = bindingElements[i];
+            var bindAttribute = inputElement.getAttribute(this.selector + 'bind');
 
             if (bindAttribute !== null) {
-                var dataValue = this.getData(data, bindAttribute);
+                var dataValue = this.getData(data, this.sanitizeDataSelector(bindAttribute));
 
                 if (dataValue === undefined) {
                     // We'll force the dataValue to be null, so we won't see "undefined" text in input fields.
                     dataValue = null;
                 }
 
-                if (child.nodeName === 'INPUT') {
-                    child.value = dataValue;
+                if (inputElement.nodeName === 'INPUT') {
+                    inputElement.value = dataValue;
+                }
+                else if (inputElement.nodeName === 'SELECT') {
+                    // Clear the existing list so we don't populate with duplicates.
+                    inputElement.innerHTML = '';
+
+                    if (dataValue.constructor.name === 'Array') {
+                        for (var i = 0; i < dataValue.length; i++) {
+                            var optionData = dataValue[i];
+                            var opt = document.createElement('option');
+
+                            // If the structure binded to the list has value/label syntax, use that, if not, use same value for both value and innerText.
+                            if (optionData.label !== undefined) {
+                                opt.value = optionData.value;
+                                opt.innerText = optionData.label;
+                            }
+                            else {
+                                opt.value = optionData;
+                                opt.innerText = optionData;
+                            }
+
+                            inputElement.appendChild(opt);
+                        }
+                    }
+                    else { // If there is only a single value that is not an array, we'll support that by making a single option value.
+                        var opt = document.createElement('option');
+                        opt.value = dataValue;
+                        opt.innerText = dataValue;
+                        inputElement.appendChild(opt);
+                    }
                 } else {
-                    child.innerHTML = dataValue;
+                    inputElement.innerHTML = dataValue;
                 }
             }
-
-            this.bind(child, data);
         }
     }
 
@@ -237,7 +275,7 @@ export class V {
     }
 
     /** Calls a method. */
-    call(methodName, action, data) {
+    call(methodName, event, source, data) {
         if (methodName.toLowerCase() === 'eval') { // A minor basic attempt to improve security.
             this.log('What are you trying to do?');
             return;
@@ -249,8 +287,7 @@ export class V {
             this.log('Handler not defined for: ' + methodName);
         } else {
             this.log('Calling: ' + methodName);
-            //this.error('Calling: ' + methodName);
-            func(this, action, data);
+            return func(this, event, source, data);
         }
     }
 
@@ -264,6 +301,14 @@ export class V {
         };
         xhttp.open("GET", url, true);
         xhttp.send();
+    }
+
+    onAction(event, data) {
+        this.call(event.srcElement.getAttribute(this.selector + 'action'), event, event.srcElement, data);
+    }
+
+    onPage(event) {
+        this.page(event.srcElement.getAttribute(this.selector + 'open'));
     }
 
     /** Initializes a page. */
@@ -308,42 +353,79 @@ export class V {
             var actionLinks = self.root.querySelectorAll('[' + this.selector + 'action]');
 
             actionLinks.forEach((action) => {
-                action.addEventListener('click', (source) => {
-                    // Find all input element contained within the parent element that has a class named "input-form".
-                    // var inputForm = findParentWithClass(action, 'input-form');
 
-                    // if (inputForm) {
-                    //     var inputElements = inputForm.getElementsByTagName('input');
+                // Make sure we don't initialize again.
+                if (action.getAttribute(this.selector + 'init') === 'true') {
+                    return;
+                }
 
-                    //     var data = {
-                    //     };
+                // Since we need to gain access to the scoped elements within this method inside the click handler, it
+                // must be registered with in-line method as oppose to a simple handler functions (if we want to avoid global instance reference).
+                action.addEventListener('click', (e) => {
+                    var data = null;
 
-                    //     for (var i = 0; i < inputElements.length; i++) {
-                    //         var input = inputElements[i];
+                    // If the action source has a form connected, we'll parse it and supply it's content to the action handler.
+                    if (e.srcElement.form) {
+                        var inputElements = e.srcElement.form.getElementsByTagName('input');
+                        var selectElements = e.srcElement.form.getElementsByTagName('select');
 
-                    //         var id = input.name.replace('-', '.');
-                    //         var value = input.value;
+                        data = {
+                        };
 
-                    //         setData(data, id, value);
+                        for (var i = 0; i < inputElements.length; i++) {
+                            var input = inputElements[i];
 
-                    //         // Replace the form input fields.
-                    //         input.value = null;
-                    //     }
-                    // }
+                            if (input.name === '') {
+                                continue;
+                            }
 
-                    var data = {};
+                            var id = this.sanitizeDataSelector(input.name);
+                            var value = input.value;
 
-                    self.call(action.getAttribute(this.selector + 'action'), action, data);
+                            this.setData(data, id, value);
+
+                            // Replace the form input fields.
+                            input.value = null;
+                        }
+
+                        for (var i = 0; i < selectElements.length; i++) {
+                            var select = selectElements[i];
+
+                            if (select.name === '') {
+                                continue;
+                            }
+
+                            var id = this.sanitizeDataSelector(select.name);
+                            var value = select.value;
+
+                            this.setData(data, id, value);
+
+                            // Replace the form input fields.
+                            //select.value = null;
+                        }
+                    }
+
+                    self.onAction(e, data);
                 });
+
+                action.setAttribute(this.selector + 'init', 'true');
             });
 
             // Hook up page navigations
             var pageLinks = this.root.querySelectorAll('[' + this.selector + 'open]');
 
             pageLinks.forEach((action) => {
-                action.addEventListener('click', () => {
-                    this.page(action.getAttribute(this.selector + 'open'));
+
+                // Make sure we don't initialize again.
+                if (action.getAttribute(this.selector + 'init') === 'true') {
+                    return;
+                }
+
+                action.addEventListener('click', (e) => {
+                    self.onPage(e);
                 });
+
+                action.setAttribute(this.selector + 'init', 'true');
             });
 
         }
